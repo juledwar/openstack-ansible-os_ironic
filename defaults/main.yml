@@ -154,6 +154,7 @@ ironic_requires_pip_packages:
   - virtualenv-tools
   - python-keystoneclient # Keystoneclient needed for the OSA keystone lib
   - httplib2 # for Ansible's uri module
+ironic_requires_pip_packages: "virtualenv virtualenv-tools python-keystoneclient httplib2 keystoneauth1"
 
 ironic_pip_packages:
   - PyMySQL
@@ -162,6 +163,7 @@ ironic_pip_packages:
   - python-swiftclient
   - pycrypto
   - python-memcached
+ironic_pip_packages: "PyMySQL MySQL-python python-ironicclient python-swiftclient pycrypto python-memcached diskimage-builder"
 
 ## RabbitMQ info
 ironic_rabbitmq_userid: ironic
@@ -200,3 +202,11 @@ ironic_policy_overrides: {}
 
 # pxe boot
 ironic_pxe_append_params: "ipa-debug=1 systemd.journald.forward_to_console=yes"
+
+# keystone admin
+ironic_keystone_admin_token: "{{ keystone_admin_token }}"
+keystone_admin_user_name: "admin"
+keystone_auth_admin_password: "{{ secrets.keystone.users.admin_password }}"
+keystone_admin_tenant_name: "admin"
+keystone_service_adminurl: "{{ keystone_protocol }}://{{ keystone_hostname }}:{{ keystone_admin_port }}/v3"
+keystone_service_adminuri_insecure: true

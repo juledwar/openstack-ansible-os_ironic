@@ -33,7 +33,7 @@
     - ironic-install
 
 - include: ironic_api_install.yml
-  when: inventory_hostname in groups['ironic_api']
+  when: "inventory_hostname in groups['ironic_api']"
   tags:
     - ironic-install
 
