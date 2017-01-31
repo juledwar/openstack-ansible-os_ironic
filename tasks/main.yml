@@ -74,3 +74,8 @@
   when: inventory_hostname == groups['ironic_api'][0]
   tags:
     - ironic-config
+
+- include: images.yml
+  when: inventory_hostname == groups['ironic_api'][0]
+  tags:
+    - ironic-images

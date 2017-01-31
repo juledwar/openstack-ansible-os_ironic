@@ -1,0 +1,82 @@
+---
+# Copyright 2017, Cisco Systems
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- stat:
+    path: "{{ ironic_bin | dirname }}/coreos_production_pxe.vmlinuz"
+  register: ironic_ipa_vmlinuz
+
+- name: Retrieve IPA kernel image
+  get_url:
+      dest: "{{ ironic_bin | dirname }}"
+      url: http://tarballs.openstack.org/ironic-python-agent/coreos/files/coreos_production_pxe.vmlinuz
+  when: not ironic_ipa_vmlinuz.stat.exists
+  register: ironic_ipa_vmlinux_downloaded
+
+- stat:
+    path: "{{ ironic_bin | dirname }}/coreos_production_pxe_image-oem.cpio.gz"
+  register: ironic_ipa_pxe_image
+
+- name: Retrieve IPA disk image
+  get_url:
+      dest: "{{ ironic_bin | dirname }}"
+      url: http://tarballs.openstack.org/ironic-python-agent/coreos/files/coreos_production_pxe_image-oem.cpio.gz
+  when: not ironic_ipa_pxe_image.stat.exists
+  register: ironic_ipa_pxe_image_downloaded
+
+- name: Upload IPA kernel image to Glance
+  shell: "glance image-create --name deploy-vmlinuz --visibility public --disk-format aki --container-format aki < {{ ironic_bin|dirname }}/coreos_production_pxe.vmlinuz"
+  when: ironic_ipa_vmlinux_downloaded|changed
+
+- name: Upload IPA disk image to Glance
+  shell: "glance image-create --name deploy-initrd --visibility public --disk-format ari --container-format ari < {{ ironic_bin|dirname }}/coreos_production_pxe_image-oem.cpio.gz"
+  when: ironic_ipa_pxe_image_downloaded|changed
+
+- stat:
+    path: "{{ironic_bin | dirname}}/ubuntu.vmlinuz"
+  register: ironic_dib_image_downloaded
+
+- name: Download and build Ubuntu DIB image
+  shell: "source {{ ironic_bin|dirname }}/bin/activate && disk-image-create ubuntu baremetal dhcp-all-interfaces -o {{ ironic_bin|dirname }}/ubuntu-image"
+  register: ironic_dib_image_built
+  when: not ironic_dib_image_downloaded.stat.exists
+
+- name: Upload DIB kernel to Glance
+  glance:
+    command: image-create
+    credentials_path: "{{ metapod_credentials_path }}"
+    user_type: admin
+    image_name: ubuntu-kernel
+    image_path: "{{ironic_bin | dirname }}/ubuntu-image.vmlinuz"
+    image_container_format: aki
+    image_disk_format: aki
+    image_is_public: True
+  when: ironic_dib_image_built | changed
+
+- name: Upload DIB initrd to Glance
+  glance:
+    command: image-create
+    credentials_path: "{{ metapod_credentials_path }}"
+    user_type: admin
+    image_name: ubuntu-image.initrd
+    image_path: "{{ironic_bin | dirname }}/ubuntu-image.initrd"
+    image_container_format: ari
+    image_disk_format: ari
+    image_is_public: True
+  when: ironic_dib_image_built | changed
+
+- name: Upload DIB instance image to Glance
+# NOTE: Can't use the glance action as it doesn't support properties.
+  shell: "glance image-create --name ubuntu-image --visibility public --disk-format qcow2 --container-format bare --property kernel_id={{ glance_images['ubuntu-kernel']['id'] }} --property ramdisk_id={{ glance_images['ubuntu-image.initrd']['id'] }} < {{ ironic_bin | dirname }}/ubuntu-image.qcow2"
+
