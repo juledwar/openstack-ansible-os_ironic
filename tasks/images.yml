@@ -62,7 +62,7 @@
   #  when: ironic_ipa_pxe_image_downloaded|changed
 
 - stat:
-    path: "{{ironic_bin | dirname}}/ubuntu.vmlinuz"
+    path: "{{ironic_bin | dirname}}/ubuntu-image.vmlinuz"
   register: ironic_dib_image_downloaded
 
 - name: Download and build Ubuntu DIB image
@@ -96,5 +96,5 @@
 
 - name: Upload DIB instance image to Glance
 # NOTE: Can't use the glance action as it doesn't support properties.
-  shell: "glance image-create --name ubuntu-image --visibility public --disk-format qcow2 --container-format bare --property kernel_id={{ glance_images['ubuntu-kernel']['id'] }} --property ramdisk_id={{ glance_images['ubuntu-image.initrd']['id'] }} < {{ ironic_bin | dirname }}/ubuntu-image.qcow2"
-#  when: ironic_dib_image_built | changed
+shell: "source /etc/metacloud/openrc.sh && openstack image create --public --disk-format qcow2 --container-format bare --property kernel_id={{ glance_images['ubuntu-kernel']['id'] }} --property ramdisk_id={{ glance_images['ubuntu-image.initrd']['id'] }} --file {{ ironic_bin | dirname }}/ubuntu-image.qcow2 ubuntu-image"
+  when: not glance_images['ubuntu-image'] is defined
