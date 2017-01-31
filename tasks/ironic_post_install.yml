@@ -15,7 +15,7 @@
 
 - name: Setup ironic for standalone usage
   set_fact:
-    ironic_driver_list: "{{ ironic_standalone_driver_list }}"
+    ironic_driver_list: "{{ ironic_standalone_driver_loaded_list }}"
     ironic_auth_strategy: "{{ ironic_standalone_auth_strategy }}"
     ironic_api_url: "{{ ironic_standalone_api_url }}"
     ironic_dhcp_provider: "{{ ironic_standalone_dhcp_provider }}"
@@ -27,7 +27,7 @@
 
 - name: Setup ironic for integrated Openstack usage
   set_fact:
-    ironic_driver_list: "{{ ironic_openstack_driver_list }}"
+    ironic_driver_list: "{{ ironic_openstack_driver_loaded_list }}"
     ironic_auth_strategy: "{{ ironic_openstack_auth_strategy }}"
     ironic_api_url: "{{ ironic_openstack_api_url | default(omit) }}"
     ironic_dhcp_provider: "{{ ironic_openstack_dhcp_provider }}"
@@ -55,9 +55,9 @@
 
 - name: Post Swift tempURL secret key via standalone auth
   command: >
-      {{ ironic_bin }}/swift {{ keystone_service_adminuri_insecure | bool | ternary('--insecure,') }}
+      {{ ironic_bin }}/swift {{ keystone_service_adminuri_insecure | bool | ternary('--insecure','') }}
       -A {{ swift_auth_url }}
--     -U {{ swift_admin_user }}
+      -U {{ swift_admin_user }}
       -K {{ swift_admin_password }}
       post -m temp-url-key:{{ ironic_swift_temp_url_secret_key }}
   when:
