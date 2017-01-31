@@ -36,11 +36,29 @@
   register: ironic_ipa_pxe_image_downloaded
 
 - name: Upload IPA kernel image to Glance
-  shell: "glance image-create --name deploy-vmlinuz --visibility public --disk-format aki --container-format aki < {{ ironic_bin|dirname }}/coreos_production_pxe.vmlinuz"
+  glance:
+    command: image-create
+    credentials_path: "{{ metapod_credentials_path }}"
+    user_type: admin
+    image_name: deploy-vmlinuz
+    image_path: "{{ironic_bin | dirname }}/coreos_production_pxe.vmlinuz"
+    image_container_format: aki
+    image_disk_format: aki
+    image_is_public: True
+  #  shell: "glance image-create --name deploy-vmlinuz --visibility public --disk-format aki --container-format aki < {{ ironic_bin|dirname }}/coreos_production_pxe.vmlinuz"
   when: ironic_ipa_vmlinux_downloaded|changed
 
 - name: Upload IPA disk image to Glance
-  shell: "glance image-create --name deploy-initrd --visibility public --disk-format ari --container-format ari < {{ ironic_bin|dirname }}/coreos_production_pxe_image-oem.cpio.gz"
+  glance:
+    command: image-create
+    credentials_path: "{{ metapod_credentials_path }}"
+    user_type: admin
+    image_name: deploy-initrd
+    image_path: "{{ironic_bin | dirname }}/coreos_production_pxe_image-oem.cpio.gz"
+    image_container_format: ari
+    image_disk_format: ari
+    image_is_public: True
+  #  shell: "glance image-create --name deploy-initrd --visibility public --disk-format ari --container-format ari < {{ ironic_bin|dirname }}/coreos_production_pxe_image-oem.cpio.gz"
   when: ironic_ipa_pxe_image_downloaded|changed
 
 - stat:
@@ -79,4 +97,4 @@
 - name: Upload DIB instance image to Glance
 # NOTE: Can't use the glance action as it doesn't support properties.
   shell: "glance image-create --name ubuntu-image --visibility public --disk-format qcow2 --container-format bare --property kernel_id={{ glance_images['ubuntu-kernel']['id'] }} --property ramdisk_id={{ glance_images['ubuntu-image.initrd']['id'] }} < {{ ironic_bin | dirname }}/ubuntu-image.qcow2"
-
+  when: ironic_dib_image_built | changed
