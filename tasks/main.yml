@@ -47,12 +47,11 @@
     - ironic_oneview_enabled | bool
     - inventory_hostname in groups['ironic_conductor']
 
-- include: ironic_post_install.yml
+- include: swift.yml
   tags:
     - ironic-config
 
-- include: swift.yml
-  when: inventory_hostname in groups['ironic_conductor'][0]
+- include: ironic_post_install.yml
   tags:
     - ironic-config
 

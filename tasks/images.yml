@@ -94,7 +94,7 @@
     image_is_public: True
   #  when: ironic_dib_image_built | changed
 
-- name: Upload DIB instance image to Glance
 # NOTE: Can't use the glance action as it doesn't support properties.
-shell: "source /etc/metacloud/openrc.sh && openstack image create --public --disk-format qcow2 --container-format bare --property kernel_id={{ glance_images['ubuntu-kernel']['id'] }} --property ramdisk_id={{ glance_images['ubuntu-image.initrd']['id'] }} --file {{ ironic_bin | dirname }}/ubuntu-image.qcow2 ubuntu-image"
+- name: Upload DIB instance image to Glance
+  shell: "source /etc/metacloud/openrc.sh && openstack image create --public --disk-format qcow2 --container-format bare --property kernel_id={{ glance_images['ubuntu-kernel']['id'] }} --property ramdisk_id={{ glance_images['ubuntu-image.initrd']['id'] }} --file {{ ironic_bin | dirname }}/ubuntu-image.qcow2 ubuntu-image"
   when: not glance_images['ubuntu-image'] is defined
