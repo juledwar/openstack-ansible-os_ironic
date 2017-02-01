@@ -20,8 +20,8 @@
     owner: "root"
     group: "root"
   with_items:
-    - { src: "ironic-ports.conf.j2", dest: "/etc/httpd/conf/ironic-ports.conf" }
-    - { src: "ironic-httpd.conf.j2", dest: "/etc/httpd/conf/ironic.conf" }
+    - { src: "ironic-ports.conf.j2", dest: "/etc/httpd/conf.d/ironic-ports.conf" }
+    - { src: "ironic-httpd.conf.j2", dest: "/etc/httpd/conf.d/ironic.conf" }
   notify:
     - Restart ironic services
 
