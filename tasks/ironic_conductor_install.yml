@@ -13,17 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- include: ironic_install_apt.yml
+- include: ironic_install_packages.yml
   static: no
-  when:
-    - ansible_pkg_mgr == 'apt'
   vars:
-    apt_pkgs: "{{ ironic_conductor_distro_packages }}"
+    ironic_pkgs: "{{ ironic_conductor_distro_packages }}"
 
-- include: ironic_install_apt.yml
+- include: ironic_install_packages.yml
   static: no
   when:
-    - ansible_pkg_mgr == 'apt'
     - ironic_standalone
   vars:
-    apt_pkgs: "{{ ironic_conductor_standalone_distro_packages }}"
+    ironic_pkgs: "{{ ironic_conductor_standalone_distro_packages }}"

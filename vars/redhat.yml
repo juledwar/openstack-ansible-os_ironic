@@ -35,8 +35,8 @@ ironic_conductor_distro_packages:
 #  - libpq-dev
 #  - python-yaml
 #  - open-iscsi
-#  - ipmitool
-#  - tftpd-hpa
+  - ipmitool
+  - tftp-server
 
 ironic_conductor_standalone_distro_packages:
 #  - isc-dhcp-server
