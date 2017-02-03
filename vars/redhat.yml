@@ -38,6 +38,9 @@ ironic_conductor_distro_packages:
   - ipmitool
   - tftp-server
 
+ironic_virtual_hypervisor_packages:
+  - libvirt-devel  # required for virtualbmc pip installation
+
 ironic_conductor_standalone_distro_packages:
 #  - isc-dhcp-server
 

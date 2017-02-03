@@ -22,7 +22,7 @@
       {% endfor %}
   when: ironic_developer_mode | bool
 
-- include: ironic_install_apt.yml
+- include: ironic_install_packages.yml
   static: no
   when:
     - ansible_pkg_mgr == 'apt'
