@@ -259,3 +259,14 @@ keystone_auth_admin_password: "{{ secrets.keystone.users.admin_password }}"
 keystone_admin_tenant_name: "admin"
 keystone_service_adminurl: "{{ keystone_protocol }}://{{ keystone_hostname }}:{{ keystone_admin_port }}/v3"
 keystone_service_adminuri_insecure: true
+
+ironic_users_to_create:
+  - name: ironic
+    password: ironic
+    privs:
+      - "ironic.*:ALL"
+    hosts:
+      - localhost
+      - 127.0.0.1
+      - "{{ (network_pools.admin_net[mc_class]|net_range_to_list) }}"
+
