@@ -1,0 +1,39 @@
+---
+# Copyright 2017 Cisco Systems
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# TODO: Make variables for net name, segment ID and tenant ID
+- name: Create provisioning network
+  neutron:
+    command: create_network
+    credentials_path: /etc/metacloud/credentials.yml
+    tenant_id: admin
+    user_type: admin
+    net_name: provisioning
+    provider_network_type: vlan
+    provider_segmentation_id: 999
+    provider_physical_network: "{{ admin_network_interface }}"
+
+# TODO: Make vars for name, cidr, pool IPs
+- name: Create provisioning subnet
+  neutron:
+      command: create_subnet
+      credentials_path: /etc/metacloud/credentials.yml
+      user_type: admin
+      net_name: provisioning
+      subnet_name: provisioning
+      cidr: 10.99.0.0/16
+      enable_dhcp: True
+      allocation_pool_start: 10.0.1.100
+      allocation_pool_end: 10.0.1.200
