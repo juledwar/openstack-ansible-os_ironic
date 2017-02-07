@@ -81,13 +81,12 @@ region_name = {{ ironic_service_region }}
 [keystone_authtoken]
 insecure = {{ keystone_service_internaluri_insecure | bool }}
 auth_type = {{ ironic_keystone_auth_plugin }}
-auth_url = {{ keystone_service_adminuri }}
-auth_uri = {{ keystone_service_internaluri }}
+auth_uri = {{ keystone_service_adminuri }}
 project_domain_id = {{ ironic_service_project_domain_id }}
 user_domain_id = {{ ironic_service_user_domain_id }}
 project_name = {{ ironic_service_project_name }}
-username = {{ ironic_service_user_name }}
-password = {{ ironic_service_password }}
+admin_username = {{ ironic_service_user_name }}
+admin_password = {{ ironic_service_password }}
 region_name = {{ keystone_service_region }}
 
 memcached_servers = {{ memcached_servers }}
