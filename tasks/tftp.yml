@@ -49,3 +49,7 @@
     dest: "/tftpboot/"
     remote_src: True
   with_items: "{{ ironic_library_modules_paths }}"
+
+- name: Start TFTP server for provisioning network
+  shell: |
+      ip netns exec {{ ironic_provisioning_netns_id }} /usr/sbin/in.tftpd -l -vvv --map-file /tftpboot/map-file

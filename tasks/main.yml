@@ -60,11 +60,6 @@
   tags:
     - ironic-config
 
-- include: tftp.yml
-  when: inventory_hostname in groups['ironic_conductor']
-  tags:
-    - ironic-config
-
 - include: ironic_db_setup.yml
   when: inventory_hostname == groups['ironic_conductor'][0]
   tags:
@@ -88,3 +83,8 @@
   when: inventory_hostname == groups['ironic_api'][0]
   tags:
     - ironic-network
+
+- include: tftp.yml
+  when: inventory_hostname in groups['ironic_conductor']
+  tags:
+    - ironic-config
