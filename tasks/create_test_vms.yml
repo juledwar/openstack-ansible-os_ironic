@@ -1,0 +1,60 @@
+---
+# Copyright 2017 Cisco Systems
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Create a storage pool
+  shell: |
+      virsh pool-define-as --name {{ ironic_vm_storage_pool_name }} dir --target /var/lib/libvirt/images &&
+      virsh pool-autostart {{ ironic_vm_storage_pool_name }} &&
+      virsh pool-start {{ ironic_vm_storage_pool_name }}
+
+- name: Create storage volumes
+  shell: |
+      virsh vol-create-as {{ ironic_vm_storage_pool_name }} {{ item }}.qcow2 1G --format qcow2 --prealloc-metadata
+  with_items: "{{ ironic_test_vm_names }}"
+
+# TODO: Create unique vlan tags per slot
+- name: Create network bridges for VMs
+  shell: |
+      ip link add br-{{ item }} type bridge &&
+      ip set br-{{ item }} up &&
+      ip link add link {{ admin_network_interface }} name {{ admin_network_interface }}.999 type vlan id 999 &&
+      ip link set {{ admin_network_interface }}.999 master br-{{ item }} &&
+      ip link set {{ admin_network_interface }}.999 up
+  with_items: "{{ ironic_test_vm_names }}"
+
+- name: Copy VM creation tool
+  copy:
+      src: vm-tools
+      dest: /tmp/
+
+- name: Create VMs
+  shell: |
+      vol_path=$(virsh vol-path --pool {{ ironic_vm_storage_pool_name }} {{ item }}.qcow2) &&
+      /tmp/vm-tools/scripts/configure-vm.py --bootdev network --name {{ item }} --image $vol_path
+        --arch x86_64 --cpus 2 --memory 1310720 --network br-{{ item }}
+        --console-log /var/log/ironic/console-{{ item }}.log
+  with_items: {{ ironic_test_vm_names }}
+
+- name: Connect VMBC to VMs
+  shell: |
+      vbmc add {{ item.1 }} --port $((6230+{{ item.0 }})) && vbmc start {{ item.1 }}
+  with_indexed_items: "{{ ironic_test_vm_names }}"
+
+- name: Create Ironic ports
+  shell: |
+      mac=(virsh dumpxml {{ item }} | grep "mac address" | head -1 | cut -d\' -f2) &&
+      uuid=$(ironic node-show {{ item }} | grep " uuid " | awk -F'|' '{print $2}' | tr -d ' ') &&
+      ironic port-create -n $uuid -a $mac
+  with_items: {{ ironic_test_vm_names }}

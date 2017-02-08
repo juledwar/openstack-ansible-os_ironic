@@ -270,3 +270,8 @@ ironic_users_to_create:
       - 127.0.0.1
       - "{{ (network_pools.admin_net[mc_class]|net_range_to_list) }}"
 
+ironic_vm_storage_pool_name: default
+ironic_test_vm_names:
+  - ironic1
+  - ironic2
+  - ironic3
